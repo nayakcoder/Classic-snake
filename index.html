@@ -1,278 +1,49 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neon Serpent: Reborn</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
     <div class="game-container">
         <div class="game-header">
             <h1>Neon Serpent: Reborn</h1>
-            <div class="game-stats">
-                <div class="score-container">
-                    <span>Score: </span>
-                    <span id="score">0</span>
-                </div>
-                <div class="high-score-container">
-                    <span>High Score: </span>
-                    <span id="highScore">0</span>
-                </div>
-                <div class="current-biome">
-                    <span>Biome: </span>
-                    <span id="currentBiome">Normal</span>
-                </div>
-                <div class="level-container">
-                    <span>Level: </span>
-                    <span id="currentLevel">1</span>
-                </div>
+            <div class="stats">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="biome">Biome: <span id="biome">Normal</span></div>
+                <div class="phase-charges">Phase Charges: <span id="phase-charges">3</span></div>
             </div>
         </div>
         
-        <div class="menu-container" id="mainMenu">
-            <h2>Welcome to Neon Serpent: Reborn</h2>
-            <div class="menu-options">
-                <button id="playBtn" class="menu-btn">Play Game</button>
-                <button id="difficultyBtn" class="menu-btn">Difficulty</button>
-                <button id="customizeBtn" class="menu-btn">Customize</button>
-                <button id="achievementsBtn" class="menu-btn">Achievements</button>
-            </div>
-        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
         
-        <div class="menu-container" id="difficultyMenu">
-            <h2>Select Difficulty</h2>
-            <div class="menu-options">
-                <button id="easyBtn" class="difficulty-btn">Easy</button>
-                <button id="normalBtn" class="difficulty-btn selected">Normal</button>
-                <button id="hardBtn" class="difficulty-btn">Hard</button>
-                <button id="insaneBtn" class="difficulty-btn">Insane</button>
-                <button id="backFromDifficultyBtn" class="back-btn">Back</button>
-            </div>
-        </div>
-        
-        <div class="menu-container" id="customizeMenu">
-            <h2>Customize Snake</h2>
-            <div class="customize-options">
-                <div class="color-option">
-                    <span>Head Color:</span>
-                    <div class="color-picker">
-                        <div class="color-choice" data-color="#4ecca3" style="background-color: #4ecca3;"></div>
-                        <div class="color-choice" data-color="#ff5252" style="background-color: #ff5252;"></div>
-                        <div class="color-choice" data-color="#40c4ff" style="background-color: #40c4ff;"></div>
-                        <div class="color-choice" data-color="#ffab40" style="background-color: #ffab40;"></div>
-                    </div>
-                </div>
-                <div class="pattern-option">
-                    <span>Pattern:</span>
-                    <select id="patternSelect">
-                        <option value="solid">Solid</option>
-                        <option value="gradient">Gradient</option>
-                        <option value="striped">Striped</option>
-                        <option value="neon">Neon Glow</option>
-                    </select>
-                </div>
-                <button id="backFromCustomizeBtn" class="back-btn">Back</button>
-            </div>
-        </div>
-        
-        <div class="menu-container" id="achievementsMenu">
-            <h2>Achievements</h2>
-            <div class="achievements-list">
-                <div class="achievement" id="ach-beginner">
-                    <i class="fas fa-trophy"></i>
-                    <div class="achievement-info">
-                        <h3>Beginner</h3>
-                        <p>Score 50 points in a single game</p>
-                    </div>
-                    <div class="achievement-status locked"><i class="fas fa-lock"></i></div>
-                </div>
-                <div class="achievement" id="ach-speedster">
-                    <i class="fas fa-bolt"></i>
-                    <div class="achievement-info">
-                        <h3>Speedster</h3>
-                        <p>Survive 30 seconds in Fire Biome</p>
-                    </div>
-                    <div class="achievement-status locked"><i class="fas fa-lock"></i></div>
-                </div>
-                <div class="achievement" id="ach-dasher">
-                    <i class="fas fa-ghost"></i>
-                    <div class="achievement-info">
-                        <h3>Dasher</h3>
-                        <p>Use Phase Dash 10 times in one game</p>
-                    </div>
-                    <div class="achievement-status locked"><i class="fas fa-lock"></i></div>
-                </div>
-                <div class="achievement" id="ach-hunter">
-                    <i class="fas fa-crosshairs"></i>
-                    <div class="achievement-info">
-                        <h3>Hunter</h3>
-                        <p>Eat 5 critters in one game</p>
-                    </div>
-                    <div class="achievement-status locked"><i class="fas fa-lock"></i></div>
-                </div>
-                <div class="achievement" id="ach-master">
-                    <i class="fas fa-crown"></i>
-                    <div class="achievement-info">
-                        <h3>Master</h3>
-                        <p>Score 200 points on Hard difficulty</p>
-                    </div>
-                    <div class="achievement-status locked"><i class="fas fa-lock"></i></div>
-                </div>
-                <button id="backFromAchievementsBtn" class="back-btn">Back</button>
-            </div>
-        </div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        
-        <div id="gameUI">
-            <div class="controls">
-                <button id="startBtn">Start Game</button>
-                <button id="resetBtn">Reset Game</button>
-                <button id="menuBtn">Main Menu</button>
+        <div class="game-controls">
+            <div class="controls-info">
+                <p class="desktop-only">Use WASD or Arrow Keys to move</p>
+                <p class="desktop-only">Press SPACE for Phase Dash</p>
+                <p class="desktop-only">Press R to restart</p>
+                <p class="mobile-only">Swipe to move, tap abilities to use</p>
             </div>
             
-            <div class="abilities-container">
-                <div class="ability">
-                    <button id="dashBtn" class="ability-btn">Phase Dash [SPACE]</button>
-                    <div class="cooldown-bar-container">
-                        <div id="dashCooldown" class="cooldown-bar"></div>
-                    </div>
-                </div>
-                
-                <div class="ability">
-                    <button id="timeWarpBtn" class="ability-btn">Time Warp [SHIFT]</button>
-                    <div class="cooldown-bar-container">
-                        <div id="timeWarpCooldown" class="cooldown-bar"></div>
-                    </div>
-                </div>
-                
-                <div class="ability">
-                    <button id="magnetBtn" class="ability-btn">Magnet [CTRL]</button>
-                    <div class="cooldown-bar-container">
-                        <div id="magnetCooldown" class="cooldown-bar"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="power-ups-container">
-                <div class="power-up-slot" id="powerUp1">
-                    <i class="fas fa-question"></i>
-                </div>
-                <div class="power-up-slot" id="powerUp2">
-                    <i class="fas fa-question"></i>
-                </div>
-                <div class="power-up-slot" id="powerUp3">
-                    <i class="fas fa-question"></i>
-                </div>
+            <div class="abilities">
+                <button id="phase-btn" class="ability-btn">Phase Dash</button>
+                <button id="magnet-btn" class="ability-btn">Magnet Tail</button>
+                <button id="explosion-btn" class="ability-btn">Tail Explosion</button>
             </div>
         </div>
         
-        <div id="gameOverScreen" class="overlay-screen">
-            <div class="overlay-content">
-                <h2>Game Over!</h2>
-                <p>Your Score: <span id="finalScore">0</span></p>
-                <p>High Score: <span id="finalHighScore">0</span></p>
-                <div class="achievement-earned hidden" id="achievementEarned">
-                    <h3>Achievement Unlocked!</h3>
-                    <p id="achievementName"></p>
-                </div>
-                <button id="playAgainBtn">Play Again</button>
-                <button id="gameOverMenuBtn">Main Menu</button>
-            </div>
-        </div>
         
-        <div id="levelUpScreen" class="overlay-screen">
-            <div class="overlay-content">
-                <h2>Level Up!</h2>
-                <p>You've reached Level <span id="newLevel">2</span></p>
-                <div class="power-up-choice">
-                    <h3>Choose a Power-Up:</h3>
-                    <div class="power-up-options">
-                        <div class="power-up-option" id="powerOption1">
-                            <i class="fas fa-bolt"></i>
-                            <p>Speed Boost</p>
-                        </div>
-                        <div class="power-up-option" id="powerOption2">
-                            <i class="fas fa-shield-alt"></i>
-                            <p>Shield</p>
-                        </div>
-                        <div class="power-up-option" id="powerOption3">
-                            <i class="fas fa-magnet"></i>
-                            <p>Food Magnet</p>
-                        </div>
-                    </div>
-                </div>
-                <button id="continueLevelBtn">Continue</button>
-            </div>
-        </div>
-        <div class="instructions">
-            <h2>How to Play</h2>
-            <p>Use the arrow keys to control the snake.</p>
-            <p>Eat the food to grow longer and earn points.</p>
-            <p>Avoid hitting the walls, obstacles, or yourself!</p>
-            <p>Collect power-ups and use special abilities to help you survive.</p>
-            
-            <div class="instructions-section">
-                <h3>Abilities:</h3>
-                <ul>
-                    <li><span class="ability-name">Phase Dash [SPACE]</span>: Temporarily phase through obstacles and yourself</li>
-                    <li><span class="ability-name">Time Warp [SHIFT]</span>: Slow down time briefly</li>
-                    <li><span class="ability-name">Magnet [CTRL]</span>: Pull all food and power-ups toward you</li>
-                </ul>
-            </div>
-            
-            <div class="instructions-section">
-                <h3>Biomes:</h3>
-                <ul>
-                    <li><span class="fire-biome">Fire Biome</span>: Increases speed but gives more points</li>
-                    <li><span class="ice-biome">Ice Biome</span>: Slows turning but reduces obstacle count</li>
-                    <li><span class="magnetic-biome">Magnetic Biome</span>: Attracts food but also attracts obstacles</li>
-                    <li><span class="toxic-biome">Toxic Biome</span>: Periodically spawns toxic clouds but special food gives extra abilities</li>
-                </ul>
-            </div>
-            
-            <div class="instructions-section">
-                <h3>Power-ups:</h3>
-                <ul>
-                    <li><i class="fas fa-bolt"></i> <span class="power-name">Speed Boost</span>: Temporarily increases your speed</li>
-                    <li><i class="fas fa-shield-alt"></i> <span class="power-name">Shield</span>: Protects from one collision</li>
-                    <li><i class="fas fa-magnet"></i> <span class="power-name">Food Magnet</span>: Attracts food items</li>
-                    <li><i class="fas fa-bomb"></i> <span class="power-name">Bomb</span>: Clears all obstacles</li>
-                    <li><i class="fas fa-star"></i> <span class="power-name">Star Power</span>: Temporary invincibility</li>
-                </ul>
-            </div>
-            
-            <div class="instructions-section">
-                <h3>Game Modes:</h3>
-                <ul>
-                    <li><span class="mode-name">Classic</span>: Traditional snake gameplay with modern features</li>
-                    <li><span class="mode-name">Time Attack</span>: Score as many points as possible in 2 minutes</li>
-                    <li><span class="mode-name">Survival</span>: Obstacles increase over time, survive as long as possible</li>
-                    <li><span class="mode-name">Zen</span>: No game over, just relaxing snake gameplay</li>
-                </ul>
-            </div>
+        
+        <div class="game-over" id="game-over" style="display: none;">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button id="restart-btn">Play Again</button>
         </div>
     </div>
+    
     <script src="script.js"></script>
-    <script>
-        // Show main menu on load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Hide game UI initially
-            document.getElementById('gameUI').style.display = 'none';
-            document.getElementById('gameOverScreen').style.display = 'none';
-            document.getElementById('levelUpScreen').style.display = 'none';
-            document.getElementById('difficultyMenu').style.display = 'none';
-            document.getElementById('customizeMenu').style.display = 'none';
-            document.getElementById('achievementsMenu').style.display = 'none';
-            
-            // Show main menu
-            document.getElementById('mainMenu').style.display = 'block';
-            
-            // Hide canvas and instructions initially
-            document.getElementById('gameCanvas').style.display = 'none';
-            document.querySelector('.instructions').style.display = 'none';
-        });
-    </script>
 </body>
 </html>
