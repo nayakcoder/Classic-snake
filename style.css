@@ -1,289 +1,548 @@
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e);
-    color: #00ffff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.game-container {
-    text-align: center;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-    border: 2px solid #00ffff;
-}
-
-.game-header {
-    margin-bottom: 20px;
-}
-
-.game-header h1 {
-    font-size: 2.5em;
-    text-shadow: 0 0 20px #00ffff;
-    margin-bottom: 15px;
-    background: linear-gradient(45deg, #00ffff, #ff00ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.stats {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 15px;
-}
-
-.stats > div {
-    background: rgba(0, 255, 255, 0.1);
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid #00ffff;
-    font-weight: bold;
-}
-
-#gameCanvas {
-    border: 3px solid #00ffff;
-    border-radius: 10px;
-    background: #000011;
-    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2);
-    display: block;
-    margin: 0 auto 20px;
-}
-
-.game-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.controls-info {
-    text-align: left;
-    font-size: 0.9em;
-    color: #aaaaaa;
-}
-
-.controls-info p {
-    margin: 5px 0;
-}
-
-.abilities {
-    display: flex;
-    gap: 10px;
-}
-
-.ability-btn {
-    background: linear-gradient(45deg, #ff006e, #8338ec);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.ability-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 0, 110, 0.4);
-}
-
-.ability-btn:disabled {
-    background: #555;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.game-over {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.95);
-    padding: 40px;
-    border-radius: 15px;
-    border: 2px solid #ff0066;
-    text-align: center;
-    z-index: 1000;
-}
-
-.game-over h2 {
-    color: #ff0066;
-    font-size: 2em;
-    margin-bottom: 20px;
-    text-shadow: 0 0 15px #ff0066;
-}
-
-#restart-btn {
-    background: linear-gradient(45deg, #00ffff, #0099cc);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-top: 20px;
-    transition: all 0.3s ease;
-}
-
-#restart-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(0, 255, 255, 0.4);
-}
-
-/* Biome effects */
-.fire-biome {
-    background: radial-gradient(circle, #ff4500, #8b0000) !important;
-    box-shadow: inset 0 0 30px rgba(255, 69, 0, 0.5) !important;
-}
-
-.ice-biome {
-    background: radial-gradient(circle, #00bfff, #4682b4) !important;
-    box-shadow: inset 0 0 30px rgba(0, 191, 255, 0.5) !important;
-}
-
-.shadow-biome {
-    background: radial-gradient(circle, #8a2be2, #4b0082) !important;
-    box-shadow: inset 0 0 30px rgba(138, 43, 226, 0.5) !important;
-}
-
-/* Mobile visibility controls */
-.mobile-only {
-    display: none;
-}
-
-.desktop-only {
-    display: block;
-}
-
-
-
-/* Touch-friendly ability buttons */
-.ability-btn {
-    touch-action: manipulation;
-    min-height: 44px;
-    padding: 12px 16px;
-}
-
-/* Prevent text selection on touch */
-* {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* Allow text selection for specific elements */
-.controls-info, .game-over p {
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-}
-
-@media (max-width: 900px) {
-    body {
-        padding: 10px;
+class NeonSerpentGame {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.gridSize = 20;
+        this.tileCount = 40;
+        
+        // Game state
+        this.snake = [{x: 10, y: 10}];
+        this.food = this.generateFood();
+        this.dx = 0;
+        this.dy = 0;
+        this.score = 0;
+        this.gameRunning = false;
+        this.gameOver = false;
+        
+        // Advanced features
+        this.phaseCharges = 3;
+        this.maxPhaseCharges = 3;
+        this.phaseActive = false;
+        this.magnetActive = false;
+        this.magnetDuration = 0;
+        this.currentBiome = 'normal';
+        this.biomeTimer = 0;
+        this.speedMultiplier = 1;
+        this.critters = [];
+        this.obstacles = [];
+        this.particles = [];
+        
+        // Abilities cooldowns
+        this.magnetCooldown = 0;
+        this.explosionCooldown = 0;
+        
+        this.setupEventListeners();
+        this.generateCritters();
+        this.generateObstacles();
+        this.gameLoop();
     }
     
-    .game-container {
-        padding: 15px;
-        width: 100%;
-        max-width: none;
+    setupEventListeners() {
+        document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+        document.getElementById('restart-btn').addEventListener('click', () => this.restartGame());
+        document.getElementById('phase-btn').addEventListener('click', () => this.activatePhase());
+        document.getElementById('magnet-btn').addEventListener('click', () => this.activateMagnet());
+        document.getElementById('explosion-btn').addEventListener('click', () => this.tailExplosion());
+        
+        
+        
+        // Touch controls for swipe gestures
+        this.setupTouchControls();
     }
     
-    .game-header h1 {
-        font-size: 1.8em;
+    setupTouchControls() {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: false });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+        }, { passive: false });
+        
+        // Prevent scrolling when touching the canvas
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
     }
     
-    .stats {
-        flex-direction: column;
-        gap: 10px;
+    handleSwipe(startX, startY, endX, endY) {
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const minSwipeDistance = 30;
+        
+        if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+            return; // Not a swipe, might be a tap
+        }
+        
+        if (!this.gameRunning && !this.gameOver) {
+            this.startGame();
+            return;
+        }
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe
+            if (deltaX > 0 && this.dx === 0) {
+                this.changeDirection(1, 0); // Right
+            } else if (deltaX < 0 && this.dx === 0) {
+                this.changeDirection(-1, 0); // Left
+            }
+        } else {
+            // Vertical swipe
+            if (deltaY > 0 && this.dy === 0) {
+                this.changeDirection(0, 1); // Down
+            } else if (deltaY < 0 && this.dy === 0) {
+                this.changeDirection(0, -1); // Up
+            }
+        }
     }
     
-    .stats > div {
-        padding: 8px 12px;
-        font-size: 0.9em;
+    changeDirection(newDx, newDy) {
+        if (!this.gameRunning && !this.gameOver) {
+            this.startGame();
+        }
+        
+        // Prevent reverse direction
+        if ((newDx === 1 && this.dx === -1) || (newDx === -1 && this.dx === 1) ||
+            (newDy === 1 && this.dy === -1) || (newDy === -1 && this.dy === 1)) {
+            return;
+        }
+        
+        this.dx = newDx;
+        this.dy = newDy;
     }
     
-    #gameCanvas {
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-        aspect-ratio: 4/3;
+    handleKeyPress(e) {
+        if (!this.gameRunning && !this.gameOver) {
+            this.startGame();
+        }
+        
+        if (this.gameOver && e.key === 'r') {
+            this.restartGame();
+            return;
+        }
+        
+        // Movement controls
+        switch(e.key) {
+            case 'ArrowUp':
+            case 'w':
+            case 'W':
+                if (this.dy === 0) {
+                    this.changeDirection(0, -1);
+                }
+                break;
+            case 'ArrowDown':
+            case 's':
+            case 'S':
+                if (this.dy === 0) {
+                    this.changeDirection(0, 1);
+                }
+                break;
+            case 'ArrowLeft':
+            case 'a':
+            case 'A':
+                if (this.dx === 0) {
+                    this.changeDirection(-1, 0);
+                }
+                break;
+            case 'ArrowRight':
+            case 'd':
+            case 'D':
+                if (this.dx === 0) {
+                    this.changeDirection(1, 0);
+                }
+                break;
+            case ' ':
+                e.preventDefault();
+                this.activatePhase();
+                break;
+        }
     }
     
-    .game-controls {
-        flex-direction: column;
-        gap: 15px;
+    startGame() {
+        this.gameRunning = true;
+        this.dx = 1;
+        this.dy = 0;
     }
     
-    .abilities {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
+    restartGame() {
+        this.snake = [{x: 10, y: 10}];
+        this.food = this.generateFood();
+        this.dx = 0;
+        this.dy = 0;
+        this.score = 0;
+        this.gameRunning = false;
+        this.gameOver = false;
+        this.phaseCharges = 3;
+        this.phaseActive = false;
+        this.magnetActive = false;
+        this.magnetDuration = 0;
+        this.currentBiome = 'normal';
+        this.biomeTimer = 0;
+        this.speedMultiplier = 1;
+        this.critters = [];
+        this.obstacles = [];
+        this.particles = [];
+        this.magnetCooldown = 0;
+        this.explosionCooldown = 0;
+        
+        this.generateCritters();
+        this.generateObstacles();
+        document.getElementById('game-over').style.display = 'none';
+        this.updateUI();
     }
     
-    .ability-btn {
-        flex: 1;
-        min-width: 120px;
-        font-size: 0.9em;
+    generateFood() {
+        let newFood;
+        do {
+            newFood = {
+                x: Math.floor(Math.random() * this.tileCount),
+                y: Math.floor(Math.random() * this.tileCount)
+            };
+        } while (this.snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+        
+        return newFood;
     }
     
-    .mobile-only {
-        display: block;
+    generateCritters() {
+        this.critters = [];
+        for (let i = 0; i < 3; i++) {
+            let critter;
+            do {
+                critter = {
+                    x: Math.floor(Math.random() * this.tileCount),
+                    y: Math.floor(Math.random() * this.tileCount),
+                    dx: Math.random() < 0.5 ? -1 : 1,
+                    dy: Math.random() < 0.5 ? -1 : 1,
+                    type: Math.random() < 0.5 ? 'friendly' : 'neutral'
+                };
+            } while (this.snake.some(segment => segment.x === critter.x && segment.y === critter.y));
+            this.critters.push(critter);
+        }
     }
     
-    .desktop-only {
-        display: none;
+    generateObstacles() {
+        this.obstacles = [];
+        for (let i = 0; i < 5; i++) {
+            let obstacle;
+            do {
+                obstacle = {
+                    x: Math.floor(Math.random() * this.tileCount),
+                    y: Math.floor(Math.random() * this.tileCount)
+                };
+            } while (this.snake.some(segment => segment.x === obstacle.x && segment.y === obstacle.y));
+            this.obstacles.push(obstacle);
+        }
     }
     
-    
-    
-    .game-over {
-        width: 90%;
-        max-width: 400px;
-        padding: 30px 20px;
+    activatePhase() {
+        if (this.phaseCharges > 0 && !this.phaseActive) {
+            this.phaseActive = true;
+            this.phaseCharges--;
+            this.createParticles(this.snake[0].x * this.gridSize + this.gridSize/2, 
+                               this.snake[0].y * this.gridSize + this.gridSize/2, '#00ffff');
+            setTimeout(() => {
+                this.phaseActive = false;
+            }, 1000);
+        }
     }
     
-    .game-over h2 {
-        font-size: 1.5em;
+    activateMagnet() {
+        if (this.magnetCooldown <= 0) {
+            this.magnetActive = true;
+            this.magnetDuration = 300; // 5 seconds at 60fps
+            this.magnetCooldown = 600; // 10 seconds cooldown
+        }
+    }
+    
+    tailExplosion() {
+        if (this.explosionCooldown <= 0 && this.snake.length > 3) {
+            const tail = this.snake[this.snake.length - 1];
+            this.createParticles(tail.x * this.gridSize + this.gridSize/2, 
+                               tail.y * this.gridSize + this.gridSize/2, '#ff6600');
+            
+            // Remove obstacles and critters in explosion radius
+            this.obstacles = this.obstacles.filter(obs => {
+                const distance = Math.abs(obs.x - tail.x) + Math.abs(obs.y - tail.y);
+                return distance > 2;
+            });
+            
+            this.critters = this.critters.filter(critter => {
+                const distance = Math.abs(critter.x - tail.x) + Math.abs(critter.y - tail.y);
+                return distance > 2;
+            });
+            
+            // Remove tail segments
+            this.snake = this.snake.slice(0, -2);
+            this.explosionCooldown = 480; // 8 seconds cooldown
+        }
+    }
+    
+    createParticles(x, y, color) {
+        for (let i = 0; i < 10; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
+                life: 30,
+                color: color
+            });
+        }
+    }
+    
+    updateBiome() {
+        this.biomeTimer++;
+        
+        if (this.biomeTimer > 600) { // Change biome every 10 seconds
+            const biomes = ['normal', 'fire', 'ice', 'shadow'];
+            let newBiome;
+            do {
+                newBiome = biomes[Math.floor(Math.random() * biomes.length)];
+            } while (newBiome === this.currentBiome);
+            
+            this.currentBiome = newBiome;
+            this.biomeTimer = 0;
+            
+            // Apply biome effects
+            switch (this.currentBiome) {
+                case 'fire':
+                    this.speedMultiplier = 1.5;
+                    this.canvas.className = 'fire-biome';
+                    break;
+                case 'ice':
+                    this.speedMultiplier = 0.7;
+                    this.canvas.className = 'ice-biome';
+                    break;
+                case 'shadow':
+                    this.speedMultiplier = 1.2;
+                    this.canvas.className = 'shadow-biome';
+                    break;
+                default:
+                    this.speedMultiplier = 1;
+                    this.canvas.className = '';
+            }
+        }
+    }
+    
+    updateCritters() {
+        this.critters.forEach(critter => {
+            // Simple AI movement
+            if (Math.random() < 0.1) {
+                critter.dx = Math.random() < 0.5 ? -1 : 1;
+                critter.dy = Math.random() < 0.5 ? -1 : 1;
+            }
+            
+            critter.x += critter.dx;
+            critter.y += critter.dy;
+            
+            // Wrap around screen
+            if (critter.x < 0) critter.x = this.tileCount - 1;
+            if (critter.x >= this.tileCount) critter.x = 0;
+            if (critter.y < 0) critter.y = this.tileCount - 1;
+            if (critter.y >= this.tileCount) critter.y = 0;
+        });
+    }
+    
+    updateParticles() {
+        this.particles = this.particles.filter(particle => {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life--;
+            particle.vx *= 0.98;
+            particle.vy *= 0.98;
+            return particle.life > 0;
+        });
+    }
+    
+    update() {
+        if (!this.gameRunning || this.gameOver) return;
+        
+        this.updateBiome();
+        this.updateCritters();
+        this.updateParticles();
+        
+        // Update cooldowns
+        if (this.magnetCooldown > 0) this.magnetCooldown--;
+        if (this.explosionCooldown > 0) this.explosionCooldown--;
+        if (this.magnetDuration > 0) {
+            this.magnetDuration--;
+            if (this.magnetDuration === 0) {
+                this.magnetActive = false;
+            }
+        }
+        
+        // Regenerate phase charges over time
+        if (this.phaseCharges < this.maxPhaseCharges && Math.random() < 0.01) {
+            this.phaseCharges++;
+        }
+        
+        // Move snake
+        const head = {x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy};
+        
+        // Magnet effect
+        if (this.magnetActive) {
+            const foodDistance = Math.abs(head.x - this.food.x) + Math.abs(head.y - this.food.y);
+            if (foodDistance <= 3) {
+                if (this.food.x < head.x) head.x--;
+                else if (this.food.x > head.x) head.x++;
+                if (this.food.y < head.y) head.y--;
+                else if (this.food.y > head.y) head.y++;
+            }
+        }
+        
+        this.snake.unshift(head);
+        
+        // Check food collision
+        if (head.x === this.food.x && head.y === this.food.y) {
+            this.score += 10 * (this.currentBiome === 'fire' ? 2 : 1);
+            this.food = this.generateFood();
+            this.createParticles(head.x * this.gridSize + this.gridSize/2, 
+                               head.y * this.gridSize + this.gridSize/2, '#00ff00');
+        } else {
+            this.snake.pop();
+        }
+        
+        // Check collisions (only if not phasing)
+        if (!this.phaseActive) {
+            // Wall collision
+            if (head.x < 0 || head.x >= this.tileCount || head.y < 0 || head.y >= this.tileCount) {
+                this.endGame();
+                return;
+            }
+            
+            // Self collision
+            for (let i = 1; i < this.snake.length; i++) {
+                if (head.x === this.snake[i].x && head.y === this.snake[i].y) {
+                    this.endGame();
+                    return;
+                }
+            }
+            
+            // Obstacle collision
+            if (this.obstacles.some(obs => obs.x === head.x && obs.y === head.y)) {
+                this.endGame();
+                return;
+            }
+        }
+        
+        // Check critter interaction
+        this.critters.forEach((critter, index) => {
+            if (head.x === critter.x && head.y === critter.y) {
+                if (critter.type === 'friendly') {
+                    this.score += 5;
+                    this.critters.splice(index, 1);
+                }
+            }
+        });
+        
+        this.updateUI();
+    }
+    
+    updateUI() {
+        document.getElementById('score').textContent = this.score;
+        document.getElementById('biome').textContent = this.currentBiome.charAt(0).toUpperCase() + this.currentBiome.slice(1);
+        document.getElementById('phase-charges').textContent = this.phaseCharges;
+        
+        // Update ability buttons
+        document.getElementById('phase-btn').disabled = this.phaseCharges === 0;
+        document.getElementById('magnet-btn').disabled = this.magnetCooldown > 0;
+        document.getElementById('explosion-btn').disabled = this.explosionCooldown > 0 || this.snake.length <= 3;
+    }
+    
+    draw() {
+        // Clear canvas
+        this.ctx.fillStyle = '#000011';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw particles
+        this.particles.forEach(particle => {
+            this.ctx.fillStyle = particle.color;
+            this.ctx.globalAlpha = particle.life / 30;
+            this.ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+            this.ctx.globalAlpha = 1;
+        });
+        
+        // Draw obstacles
+        this.ctx.fillStyle = '#666666';
+        this.obstacles.forEach(obs => {
+            this.ctx.fillRect(obs.x * this.gridSize, obs.y * this.gridSize, this.gridSize - 2, this.gridSize - 2);
+        });
+        
+        // Draw critters
+        this.critters.forEach(critter => {
+            this.ctx.fillStyle = critter.type === 'friendly' ? '#00ff00' : '#ffff00';
+            this.ctx.fillRect(critter.x * this.gridSize + 2, critter.y * this.gridSize + 2, this.gridSize - 4, this.gridSize - 4);
+        });
+        
+        // Draw food
+        this.ctx.fillStyle = '#ff0066';
+        this.ctx.fillRect(this.food.x * this.gridSize, this.food.y * this.gridSize, this.gridSize - 2, this.gridSize - 2);
+        
+        // Draw snake
+        this.snake.forEach((segment, index) => {
+            if (index === 0) {
+                // Head
+                this.ctx.fillStyle = this.phaseActive ? '#00ffff' : '#00ff99';
+                if (this.phaseActive) {
+                    this.ctx.shadowColor = '#00ffff';
+                    this.ctx.shadowBlur = 20;
+                }
+            } else {
+                // Body
+                this.ctx.fillStyle = this.magnetActive ? '#ff00ff' : '#00cc88';
+                this.ctx.shadowBlur = 0;
+            }
+            
+            this.ctx.fillRect(segment.x * this.gridSize, segment.y * this.gridSize, this.gridSize - 2, this.gridSize - 2);
+        });
+        
+        this.ctx.shadowBlur = 0;
+        
+        // Draw magnet field
+        if (this.magnetActive) {
+            this.ctx.strokeStyle = '#ff00ff';
+            this.ctx.lineWidth = 2;
+            this.ctx.setLineDash([5, 5]);
+            this.ctx.strokeRect(
+                (this.snake[0].x - 3) * this.gridSize,
+                (this.snake[0].y - 3) * this.gridSize,
+                7 * this.gridSize,
+                7 * this.gridSize
+            );
+            this.ctx.setLineDash([]);
+        }
+    }
+    
+    endGame() {
+        this.gameOver = true;
+        this.gameRunning = false;
+        document.getElementById('final-score').textContent = this.score;
+        document.getElementById('game-over').style.display = 'block';
+    }
+    
+    gameLoop() {
+        this.update();
+        this.draw();
+        
+        const gameSpeed = this.currentBiome === 'fire' ? 120 : 
+                         this.currentBiome === 'ice' ? 200 : 150;
+        
+        setTimeout(() => this.gameLoop(), gameSpeed / this.speedMultiplier);
     }
 }
 
-@media (max-width: 480px) {
-    .game-container {
-        padding: 10px;
-    }
-    
-    .game-header h1 {
-        font-size: 1.5em;
-    }
-    
-    .stats {
-        font-size: 0.8em;
-    }
-    
-    .ability-btn {
-        min-width: 100px;
-        font-size: 0.8em;
-        padding: 10px 12px;
-    }
-    
-    
-}
+// Start the game when page loads
+window.addEventListener('load', () => {
+    new NeonSerpentGame();
+});
